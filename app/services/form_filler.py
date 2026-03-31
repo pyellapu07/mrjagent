@@ -7,14 +7,30 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 RESUME_PATH = "profile/Pradeep_Yellapu_UX-Research_Product-Design_2026.pdf"
 
+# Confirmation indicators — if any of these appear after submit, it worked
+SUCCESS_INDICATORS = [
+    "thank you", "thanks for applying", "application received",
+    "application submitted", "you've applied", "successfully submitted",
+    "we'll be in touch", "application complete", "good luck"
+]
+
+# Error indicators — if these appear, submission failed
+ERROR_INDICATORS = [
+    "error", "required", "invalid", "please fill", "missing",
+    "captcha", "verification required"
+]
+
 
 def load_profile() -> dict:
     with open(settings.PROFILE_PATH) as f:
         return json.load(f)
 
 
-async def fill_form_with_ai(page, job) -> bool:
-    """Use GPT-4o to intelligently fill and SUBMIT any job application form."""
+async def fill_form_with_ai(page, job) -> tuple[bool, str]:
+    """
+    Fill and submit a job application form.
+    Returns (success: bool, message: str)
+    """
     profile = load_profile()
 
     # Get all form fields on page
@@ -34,7 +50,7 @@ async def fill_form_with_ai(page, job) -> bool:
     """)
 
     if not fields:
-        return False
+        return False, "No form fields found on page"
 
     prompt = f"""You are filling out a job application for this candidate:
 
@@ -67,7 +83,7 @@ Only include fields you can confidently fill. Skip file upload fields."""
 
     fill_data = json.loads(response.choices[0].message.content)
 
-    # Fill in the form
+    # Fill in the form fields
     filled = 0
     for field_key, value in fill_data.items():
         try:
@@ -84,7 +100,7 @@ Only include fields you can confidently fill. Skip file upload fields."""
             continue
 
     if filled == 0:
-        return False
+        return False, "Could not fill any form fields"
 
     # Upload resume if file input exists
     try:
@@ -95,23 +111,54 @@ Only include fields you can confidently fill. Skip file upload fields."""
         pass
 
     # Click submit button
-    submitted = False
+    url_before = page.url
+    clicked = False
     for selector in [
         'button[type="submit"]',
         'input[type="submit"]',
+        'button:has-text("Submit Application")',
         'button:has-text("Submit")',
+        'button:has-text("Apply Now")',
         'button:has-text("Apply")',
         'button:has-text("Send Application")',
-        'button:has-text("Submit Application")',
     ]:
         try:
             btn = await page.query_selector(selector)
             if btn:
-                await btn.click()
-                await page.wait_for_timeout(3000)
-                submitted = True
-                break
+                is_visible = await btn.is_visible()
+                is_enabled = await btn.is_enabled()
+                if is_visible and is_enabled:
+                    await btn.click()
+                    await page.wait_for_timeout(4000)
+                    clicked = True
+                    break
         except Exception:
             continue
 
-    return submitted
+    if not clicked:
+        return False, "Could not find or click submit button"
+
+    # Verify success by checking page content after submit
+    url_after = page.url
+    page_text = (await page.inner_text("body")).lower()
+
+    # URL changed = likely navigated to confirmation page
+    url_changed = url_after != url_before
+
+    # Check for success/error keywords
+    has_success = any(indicator in page_text for indicator in SUCCESS_INDICATORS)
+    has_error = any(indicator in page_text for indicator in ERROR_INDICATORS)
+
+    if has_success and not has_error:
+        return True, "Confirmation page detected"
+    elif url_changed and not has_error:
+        return True, f"Redirected to {url_after}"
+    elif has_error:
+        # Capture what went wrong
+        error_snippet = next(
+            (ind for ind in ERROR_INDICATORS if ind in page_text), "unknown error"
+        )
+        return False, f"Form error detected: '{error_snippet}'"
+    else:
+        # Ambiguous — clicked submit but can't confirm
+        return False, "Submitted but could not verify confirmation"

@@ -4,7 +4,7 @@ from app.services.form_filler import fill_form_with_ai
 from app.browser import BROWSER_ARGS
 
 
-async def apply_greenhouse(job: Job) -> bool:
+async def apply_greenhouse(job: Job) -> tuple[bool, str]:
     """Apply to a Greenhouse-hosted job application."""
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, args=BROWSER_ARGS)
@@ -17,33 +17,26 @@ async def apply_greenhouse(job: Job) -> bool:
             await page.goto(job.url, timeout=30000)
             await page.wait_for_load_state("networkidle")
 
-            # Try direct apply URL first (Greenhouse pattern)
-            current_url = page.url
-            if "/jobs/" in current_url and "/applications/" not in current_url:
-                apply_url = current_url.rstrip("/") + "?gh_src=mrjagent"
-                # Look for Apply Now button
-                apply_btn = await page.query_selector(
-                    "a[href*='/applications/new'], "
-                    "a:has-text('Apply for this Job'), "
-                    "a:has-text('Apply Now'), "
-                    "button:has-text('Apply')"
-                )
-                if apply_btn:
-                    await apply_btn.click()
-                    await page.wait_for_load_state("networkidle")
-                    await page.wait_for_timeout(2000)
+            # Look for Apply button to get to the actual form
+            apply_btn = await page.query_selector(
+                "a[href*='/applications/new'], "
+                "a:has-text('Apply for this Job'), "
+                "a:has-text('Apply Now'), "
+                "button:has-text('Apply')"
+            )
+            if apply_btn:
+                await apply_btn.click()
+                await page.wait_for_load_state("networkidle")
+                await page.wait_for_timeout(2000)
 
-            # Check we're on an actual application form (not just listing)
+            # Must have a form to proceed
             form = await page.query_selector("form")
             if not form:
-                print(f"No form found on {page.url}")
-                return False
+                return False, f"No application form found at {page.url}"
 
-            success = await fill_form_with_ai(page, job)
-            return success
+            return await fill_form_with_ai(page, job)
 
         except Exception as e:
-            print(f"Greenhouse application error: {e}")
-            raise  # Re-raise so apply.py catches it properly
+            return False, str(e)
         finally:
             await browser.close()

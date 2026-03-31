@@ -9,24 +9,24 @@ async def trigger_application(job: Job):
     await send_message(f"🤖 Starting application for *{job.title}* at *{job.company}*...")
 
     success = False
-    error_msg = ""
+    message = ""
 
     try:
         update_job_status(job.id, JobStatus.APPLYING)
 
         if job.source == "greenhouse":
             from app.services.applicators.greenhouse import apply_greenhouse
-            success = await apply_greenhouse(job)
+            success, message = await apply_greenhouse(job)
         elif job.source == "linkedin":
             from app.services.applicators.linkedin import apply_linkedin
-            success = await apply_linkedin(job)
+            success, message = await apply_linkedin(job)
         else:
             from app.services.applicators.generic import apply_generic
-            success = await apply_generic(job)
+            success, message = await apply_generic(job)
 
     except Exception as e:
-        error_msg = str(e)
         success = False
+        message = str(e)
 
     if success:
         update_job_status(job.id, JobStatus.APPLIED)
@@ -37,15 +37,16 @@ async def trigger_application(job: Job):
             status="submitted"
         ))
         await send_message(
-            f"✅ *Submitted!*\n\n"
+            f"✅ *Application Submitted!*\n\n"
             f"*{job.title}* at *{job.company}*\n"
-            f"Watch your inbox at `pyellapu@umd.edu` for confirmation."
+            f"_{message}_\n\n"
+            f"Watch `pyellapu@umd.edu` for confirmation email."
         )
     else:
         update_job_status(job.id, JobStatus.FAILED)
-        reason = f"\n_Error: {error_msg}_" if error_msg else ""
         await send_message(
-            f"❌ *Could not auto-apply*\n\n"
+            f"❌ *Auto-apply failed*\n\n"
             f"*{job.title}* at *{job.company}*\n"
-            f"[Apply manually here]({job.url}){reason}"
+            f"_Reason: {message}_\n\n"
+            f"[Apply manually here]({job.url})"
         )
