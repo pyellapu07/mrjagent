@@ -4,7 +4,7 @@ from app.services.form_filler import fill_form_with_ai
 from app.browser import BROWSER_ARGS
 
 
-async def apply_generic(job: Job) -> tuple[bool, str]:
+async def apply_generic(job: Job) -> dict:
     """Generic application handler for company career pages."""
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, args=BROWSER_ARGS)
@@ -29,11 +29,17 @@ async def apply_generic(job: Job) -> tuple[bool, str]:
 
             form = await page.query_selector("form")
             if not form:
-                return False, f"No application form found at {page.url}"
+                return {
+                    "filled": 0, "skipped": [], "resume_uploaded": False,
+                    "current_url": job.url, "error": "No form found"
+                }
 
             return await fill_form_with_ai(page, job)
 
         except Exception as e:
-            return False, str(e)
+            return {
+                "filled": 0, "skipped": [], "resume_uploaded": False,
+                "current_url": job.url, "error": str(e)
+            }
         finally:
             await browser.close()
