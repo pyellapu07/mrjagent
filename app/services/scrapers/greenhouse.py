@@ -1,5 +1,6 @@
 import httpx
 from app.models.job import Job
+# Note: Greenhouse uses public API (no browser needed)
 
 # Top companies using Greenhouse with relevant design/UX roles
 GREENHOUSE_COMPANIES = [

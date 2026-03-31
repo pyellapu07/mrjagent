@@ -1,5 +1,6 @@
 from playwright.async_api import async_playwright
 from app.models.job import Job
+from app.browser import BROWSER_ARGS
 import asyncio
 
 
@@ -8,7 +9,7 @@ async def scrape_jobright(target_roles: list[str]) -> list[Job]:
     jobs = []
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=True, args=BROWSER_ARGS)
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         )
