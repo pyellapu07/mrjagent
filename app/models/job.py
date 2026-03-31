@@ -19,14 +19,15 @@ class Job(BaseModel):
     company: str
     location: str
     salary: Optional[str] = None
-    job_type: Optional[str] = None  # remote/hybrid/onsite
+    job_type: Optional[str] = None
     description: Optional[str] = None
     url: str
-    source: str  # jobright / linkedin / greenhouse / company
+    source: str
     match_score: Optional[int] = None
     match_reasons: Optional[list[str]] = None
     status: JobStatus = JobStatus.PENDING_APPROVAL
     telegram_message_id: Optional[int] = None
-    created_at: Optional[datetime] = None
+    posted_at: Optional[datetime] = None   # ← when job was posted
+    created_at: Optional[datetime] = None  # ← when we found it
     applied_at: Optional[datetime] = None
     notes: Optional[str] = None
