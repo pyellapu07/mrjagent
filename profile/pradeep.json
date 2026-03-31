@@ -1,0 +1,92 @@
+{
+  "name": "Pradeep Yellapu",
+  "email": "pyellapu@umd.edu",
+  "phone": "2406107815",
+  "location": "College Park, MD, USA",
+  "linkedin": "https://linkedin.com/in/pradeepyellapu",
+  "github": "https://github.com/pyellapu07",
+  "portfolio": "",
+  "summary": "Product Designer & UX Researcher with 5+ years shipping user-centered digital products across enterprise SaaS, AI platforms, and consumer applications.",
+  "target_roles": [
+    "Product Designer",
+    "UX Designer",
+    "UX Researcher",
+    "Product Researcher",
+    "Product Analyst",
+    "UI/UX Designer",
+    "Product Manager"
+  ],
+  "experience_years": 5,
+  "education": [
+    {
+      "degree": "Master of Science, Data Science (Minor: UX Research Methods)",
+      "school": "University of Maryland",
+      "location": "College Park, MD",
+      "gpa": "3.85",
+      "start": "Aug 2024",
+      "end": "May 2026"
+    },
+    {
+      "degree": "Bachelor of Technology, Computer Science & Business Systems",
+      "school": "SRM Institute of Science & Technology",
+      "location": "India",
+      "gpa": "3.70",
+      "start": "Jun 2019",
+      "end": "May 2023"
+    }
+  ],
+  "experience": [
+    {
+      "title": "Product Designer & Researcher",
+      "company": "The Xylem Institute | University of Maryland",
+      "location": "College Park, MD",
+      "start": "Nov 2025",
+      "end": "Present",
+      "highlights": [
+        "Owned product design for AGRA AutoPilot from discovery to ship, 54-country satellite data product",
+        "Architected 2 Figma design systems from 0-to-1 for a NASA-affiliated research lab, achieving 32% reduction in bounce rate",
+        "Deployed to Nairobi, Kenya (March 2026) as lead designer and workshop facilitator for 30+ senior government officials from 6 East African nations"
+      ]
+    },
+    {
+      "title": "Product Design & UX Research Intern",
+      "company": "MarketCrunch AI",
+      "location": "San Francisco, CA (Remote)",
+      "start": "Jun 2025",
+      "end": "Sep 2025",
+      "highlights": [
+        "Led UX audit using Nielsen's 10 usability principles, 15% reduction in reporting errors",
+        "Launched 2 features increasing elite plan sales by 40%",
+        "Achieved 167% increase in new user attempts (Jul-Sep 2025)"
+      ]
+    },
+    {
+      "title": "Technical UX Analyst",
+      "company": "Computacenter",
+      "location": "Bengaluru, IN",
+      "start": "Jan 2023",
+      "end": "Jul 2024",
+      "highlights": [
+        "Designed automated diagnostic dashboards reducing MTTR by 40%",
+        "Used Power BI and Figma to translate requirements into user-centered BI dashboards"
+      ]
+    }
+  ],
+  "skills": {
+    "design": ["Human-Centric Design", "Interaction Design", "Visual Design", "Prototyping", "Information Architecture", "Design Systems", "WCAG 2.2 AA"],
+    "research": ["Journey Mapping", "Card Sorting", "In-Depth Interviews", "Ethnographic Research", "Competitive Analysis", "Usability Testing", "A/B Testing", "Contextual Inquiry", "Thematic Analysis"],
+    "tools": ["Figma", "Adobe XD", "Photoshop", "Illustrator", "Miro", "Notion", "Power BI", "QGIS", "Tableau"],
+    "technical": ["HTML/CSS", "JavaScript", "Python", "SQL", "Git/GitHub"]
+  },
+  "certifications": [
+    "CITI Program Certification - Social & Behavioral Research (Feb 2025)",
+    "Foundations of UX Design by Google (March 2022)",
+    "DHS Certified Trusted Tester for Web Accessibility - WCAG (Section 508) (March 2026)"
+  ],
+  "job_preferences": {
+    "salary_floor": null,
+    "work_type": ["remote", "hybrid", "onsite"],
+    "seniority": ["mid", "senior"],
+    "locations": ["USA"]
+  }
+}
