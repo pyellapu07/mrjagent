@@ -14,7 +14,7 @@ def load_profile() -> dict:
 
 
 async def fill_form_with_ai(page, job) -> bool:
-    """Use GPT-4o to intelligently fill any job application form."""
+    """Use GPT-4o to intelligently fill and SUBMIT any job application form."""
     profile = load_profile()
 
     # Get all form fields on page
@@ -83,6 +83,9 @@ Only include fields you can confidently fill. Skip file upload fields."""
         except Exception:
             continue
 
+    if filled == 0:
+        return False
+
     # Upload resume if file input exists
     try:
         file_input = await page.query_selector('input[type="file"]')
@@ -91,4 +94,24 @@ Only include fields you can confidently fill. Skip file upload fields."""
     except Exception:
         pass
 
-    return filled > 0
+    # Click submit button
+    submitted = False
+    for selector in [
+        'button[type="submit"]',
+        'input[type="submit"]',
+        'button:has-text("Submit")',
+        'button:has-text("Apply")',
+        'button:has-text("Send Application")',
+        'button:has-text("Submit Application")',
+    ]:
+        try:
+            btn = await page.query_selector(selector)
+            if btn:
+                await btn.click()
+                await page.wait_for_timeout(3000)
+                submitted = True
+                break
+        except Exception:
+            continue
+
+    return submitted

@@ -5,12 +5,20 @@ from app.routers import webhook
 from app.tasks.crawl import run_crawl
 import httpx
 import os
+import subprocess
 
 scheduler = AsyncIOScheduler()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Install Chromium at startup (persists for this process lifetime)
+    try:
+        subprocess.run(["playwright", "install", "chromium"], check=True, timeout=120)
+        print("✅ Chromium installed successfully")
+    except Exception as e:
+        print(f"⚠️ Chromium install warning: {e}")
+
     # Register Telegram webhook
     bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
     webhook_url = os.getenv("RENDER_EXTERNAL_URL", "")
