@@ -9,7 +9,7 @@ services:
         sync: false
       - key: TELEGRAM_CHAT_ID
         sync: false
-      - key: ANTHROPIC_API_KEY
+      - key: OPENAI_API_KEY
         sync: false
       - key: SUPABASE_URL
         sync: false

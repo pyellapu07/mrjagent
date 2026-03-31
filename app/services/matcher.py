@@ -1,9 +1,10 @@
 import json
-import anthropic
+import os
+from openai import OpenAI
 from app.config import settings
 from app.models.job import Job
 
-client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def load_profile() -> dict:
@@ -12,7 +13,7 @@ def load_profile() -> dict:
 
 
 def score_job(job: Job) -> tuple[int, list[str]]:
-    """Use Claude to score a job against Pradeep's profile. Returns (score 0-100, reasons)."""
+    """Use GPT-4o to score a job against Pradeep's profile. Returns (score 0-100, reasons)."""
     profile = load_profile()
 
     prompt = f"""You are a job matching assistant. Score how well this job matches the candidate profile.
@@ -40,16 +41,12 @@ Score this job match from 0 to 100. Return JSON only:
 
 Score 80-100: Excellent fit. 60-79: Good fit. 40-59: Partial fit. Below 40: Poor fit."""
 
-    response = client.messages.create(
-        model="claude-opus-4-5",
-        max_tokens=300,
-        messages=[{"role": "user", "content": prompt}]
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        response_format={"type": "json_object"},
+        max_tokens=300
     )
 
-    import re
-    text = response.content[0].text
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    if match:
-        result = json.loads(match.group())
-        return result.get("score", 0), result.get("reasons", [])
-    return 0, []
+    result = json.loads(response.choices[0].message.content)
+    return result.get("score", 0), result.get("reasons", [])

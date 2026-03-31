@@ -1,8 +1,9 @@
 import json
-import anthropic
+import os
+from openai import OpenAI
 from app.config import settings
 
-client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 RESUME_PATH = "profile/Pradeep_Yellapu_UX-Research_Product-Design_2026.pdf"
 
@@ -12,8 +13,8 @@ def load_profile() -> dict:
         return json.load(f)
 
 
-async def fill_form_with_claude(page, job) -> bool:
-    """Use Claude to intelligently fill any job application form."""
+async def fill_form_with_ai(page, job) -> bool:
+    """Use GPT-4o to intelligently fill any job application form."""
     profile = load_profile()
 
     # Get all form fields on page
@@ -35,7 +36,6 @@ async def fill_form_with_claude(page, job) -> bool:
     if not fields:
         return False
 
-    # Ask Claude what to fill in each field
     prompt = f"""You are filling out a job application for this candidate:
 
 Name: {profile['name']}
@@ -54,27 +54,18 @@ Job: {job.title} at {job.company}
 Form fields detected:
 {json.dumps(fields, indent=2)}
 
-For each field with a non-empty name, provide the value to fill in. Return JSON:
-{{
-  "field_name_or_id": "value_to_fill",
-  ...
-}}
-
+For each field with a non-empty name, provide the value to fill in.
+Return JSON only with field name as key and value to fill as value.
 Only include fields you can confidently fill. Skip file upload fields."""
 
-    response = client.messages.create(
-        model="claude-opus-4-5",
-        max_tokens=1000,
-        messages=[{"role": "user", "content": prompt}]
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        response_format={"type": "json_object"},
+        max_tokens=1000
     )
 
-    import re
-    text = response.content[0].text
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    if not match:
-        return False
-
-    fill_data = json.loads(match.group())
+    fill_data = json.loads(response.choices[0].message.content)
 
     # Fill in the form
     filled = 0
@@ -92,7 +83,7 @@ Only include fields you can confidently fill. Skip file upload fields."""
         except Exception:
             continue
 
-    # Upload resume if there's a file input
+    # Upload resume if file input exists
     try:
         file_input = await page.query_selector('input[type="file"]')
         if file_input:

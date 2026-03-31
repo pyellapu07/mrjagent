@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str
     TELEGRAM_CHAT_ID: str  # Pradeep's personal chat ID
 
-    # Anthropic
-    ANTHROPIC_API_KEY: str
+    # OpenAI
+    OPENAI_API_KEY: str
 
     # Supabase
     SUPABASE_URL: str
