@@ -3,6 +3,7 @@ from app.services.database import get_job_by_id, update_job_status
 from app.models.job import JobStatus
 from app.bot.telegram import answer_callback, send_message
 from app.tasks.apply import trigger_application
+from app.tasks.crawl import run_crawl
 
 router = APIRouter()
 
@@ -47,3 +48,10 @@ async def telegram_webhook(request: Request, background_tasks: BackgroundTasks):
 @router.get("/webhook/health")
 async def health():
     return {"status": "mrjagent is running 🤖"}
+
+
+@router.post("/crawl/trigger")
+async def trigger_crawl(background_tasks: BackgroundTasks):
+    """Manually trigger a job crawl."""
+    background_tasks.add_task(run_crawl)
+    return {"status": "Crawl started! Check your Telegram in a few minutes 🔍"}
